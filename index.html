@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actividad Semana 2 · Lógica de Predicados y Álgebra Booleana</title>
+<style>
+  :root{
+    --tinta:#12161F;
+    --papel:#E7EAF1;
+    --superficie:#FFFFFF;
+    --acento:#4B2EE0;
+    --acento-suave:#EBE7FD;
+    --verdadero:#0A7A66;
+    --falso:#C0281B;
+    --gris:#67707F;
+    --linea:#D3D8E3;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--papel);
+    color:var(--tinta);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .marco{max-width:960px;margin:0 auto;padding:0 18px 80px}
+
+  /* ---------- cabecera ---------- */
+  header.tapa{
+    background:var(--tinta);
+    color:#fff;
+    border-radius:0 0 22px 22px;
+    padding:26px 24px 22px;
+    margin-bottom:26px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.tapa .simbolos{
+    position:absolute;right:-10px;top:-18px;
+    font-family:var(--mono);font-size:96px;letter-spacing:6px;
+    color:rgba(255,255,255,.07);pointer-events:none;user-select:none;
+  }
+  .curso{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#9AA6FF}
+  header.tapa h1{
+    font-size:clamp(26px,5vw,40px);
+    line-height:1.05;
+    letter-spacing:-.03em;
+    font-weight:800;
+    margin:8px 0 6px;
+    max-width:20ch;
+  }
+  header.tapa p.sub{margin:0;color:#B9C0CE;font-size:14px}
+  .marcador{
+    display:flex;gap:18px;align-items:baseline;flex-wrap:wrap;
+    margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.15);
+    font-family:var(--mono);font-size:13px;color:#B9C0CE;
+  }
+  .marcador b{color:#fff;font-size:20px;font-weight:700}
+  .bits{letter-spacing:.28em;color:#7FE3CE}
+
+  /* ---------- bloques ---------- */
+  section.bloque{
+    background:var(--superficie);
+    border:1px solid var(--linea);
+    border-radius:16px;
+    padding:22px 20px;
+    margin-bottom:22px;
+  }
+  .rotulo{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .glifo{
+    font-family:var(--mono);font-size:22px;font-weight:700;
+    background:var(--acento-suave);color:var(--acento);
+    width:42px;height:42px;flex:0 0 42px;
+    display:grid;place-items:center;border-radius:11px;
+  }
+  .rotulo h2{margin:0;font-size:19px;letter-spacing:-.01em}
+  .rotulo .puntos{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--gris)}
+  .intro{color:var(--gris);font-size:14.5px;margin:6px 0 18px}
+
+  /* ---------- preguntas ---------- */
+  .pregunta{border-top:1px solid var(--linea);padding:16px 0 4px}
+  .pregunta:first-of-type{border-top:none}
+  .enunciado{display:flex;gap:10px;margin-bottom:10px}
+  .num{font-family:var(--mono);color:var(--acento);font-size:13px;padding-top:3px}
+  .frase{font-size:16px}
+  .frase em{font-style:normal;background:#F2F0FE;padding:1px 5px;border-radius:5px}
+  .opciones{display:grid;gap:7px}
+  .opcion{
+    display:flex;gap:10px;align-items:flex-start;
+    border:1px solid var(--linea);border-radius:10px;
+    padding:9px 12px;cursor:pointer;background:#FCFCFE;
+    font-family:var(--mono);font-size:14px;line-height:1.4;
+    transition:border-color .12s, background .12s;
+  }
+  .opcion:hover{border-color:#A99BF2}
+  .opcion input{margin:3px 0 0;accent-color:var(--acento);flex:0 0 auto}
+  .opcion.sel{border-color:var(--acento);background:var(--acento-suave)}
+  .opcion.ok{border-color:var(--verdadero);background:#E8F6F3}
+  .opcion.mal{border-color:var(--falso);background:#FBEBE9}
+
+  /* segmentado equivalencias */
+  .par{font-family:var(--mono);font-size:15px;background:#F7F8FB;border:1px solid var(--linea);border-radius:10px;padding:10px 12px;margin-bottom:8px;overflow-x:auto}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{
+    font-family:var(--sans);font-size:14px;font-weight:600;
+    border:1px solid var(--linea);background:#fff;color:var(--tinta);
+    border-radius:9px;padding:8px 14px;cursor:pointer;
+  }
+  .seg button[aria-pressed="true"]{background:var(--acento);border-color:var(--acento);color:#fff}
+  .seg button.ok{background:var(--verdadero);border-color:var(--verdadero);color:#fff}
+  .seg button.mal{background:var(--falso);border-color:var(--falso);color:#fff}
+
+  /* ---------- tabla de verdad ---------- */
+  .tabla-envoltura{overflow-x:auto;margin-bottom:10px}
+  table.tv{border-collapse:collapse;width:100%;min-width:520px;font-family:var(--mono);font-size:14px}
+  table.tv th{
+    background:var(--tinta);color:#fff;font-weight:600;
+    padding:9px 8px;font-size:13px;text-align:center;
+  }
+  table.tv th:first-child{border-radius:9px 0 0 0}
+  table.tv th:last-child{border-radius:0 9px 0 0}
+  table.tv td{border:1px solid var(--linea);padding:0;text-align:center;height:44px}
+  table.tv td.dato{background:#F3F5FA;font-weight:700;width:52px}
+  .celda{
+    width:100%;height:44px;border:0;background:transparent;cursor:pointer;
+    font-family:var(--mono);font-size:16px;font-weight:700;color:var(--gris);
+  }
+  .celda[data-v="V"]{background:#E4F4F0;color:var(--verdadero)}
+  .celda[data-v="F"]{background:#FCECEA;color:var(--falso)}
+  .celda.ok{outline:2px solid var(--verdadero);outline-offset:-2px}
+  .celda.mal{outline:2px solid var(--falso);outline-offset:-2px}
+  .pista{font-size:13px;color:var(--gris);font-family:var(--mono)}
+
+  /* ---------- formulario ---------- */
+  .campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+  label.campo{display:block;font-size:13px;font-weight:600;color:var(--gris)}
+  label.campo input, textarea{
+    width:100%;margin-top:6px;padding:10px 12px;
+    border:1px solid var(--linea);border-radius:10px;
+    font-family:var(--sans);font-size:15px;background:#FCFCFE;color:var(--tinta);
+  }
+  textarea{min-height:90px;resize:vertical}
+  input:focus,textarea:focus,button:focus-visible,.opcion:focus-within{outline:2px solid var(--acento);outline-offset:2px}
+
+  /* ---------- botones ---------- */
+  .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .btn{
+    font-family:var(--sans);font-size:15px;font-weight:600;
+    border-radius:11px;padding:12px 20px;cursor:pointer;border:1px solid var(--tinta);
+    background:var(--tinta);color:#fff;
+  }
+  .btn.claro{background:#fff;color:var(--tinta)}
+  .btn.acento{background:var(--acento);border-color:var(--acento)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* ---------- retroalimentación ---------- */
+  .feedback{
+    display:none;margin-top:10px;padding:10px 12px;border-radius:10px;
+    font-size:14px;border-left:4px solid var(--acento);background:#F5F4FE;
+  }
+  .feedback.visible{display:block}
+  .feedback.mal{border-left-color:var(--falso);background:#FCF0EE}
+  .feedback.bien{border-left-color:var(--verdadero);background:#EAF6F3}
+
+  /* ---------- resultado ---------- */
+  #resultado{display:none}
+  .nota{
+    display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end;
+    border-bottom:1px solid var(--linea);padding-bottom:16px;margin-bottom:16px;
+  }
+  .nota .cifra{font-size:56px;font-weight:800;letter-spacing:-.04em;line-height:1}
+  .nota .etq{font-family:var(--mono);font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.12em}
+  .desglose{font-family:var(--mono);font-size:14px;color:var(--tinta)}
+  .desglose div{display:flex;justify-content:space-between;border-bottom:1px dotted var(--linea);padding:5px 0;max-width:420px}
+  .aviso{font-size:13.5px;color:var(--gris);margin-top:14px}
+  .estado-envio{margin-top:12px;font-size:14px;font-weight:600}
+  .oculto{display:none}
+  footer{text-align:center;font-size:12.5px;color:var(--gris);font-family:var(--mono);padding:26px 0 0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* ---------- informe imprimible ---------- */
+  #informe{display:none}
+  #informe h1{font-size:20px;margin:0 0 2px;letter-spacing:-.01em}
+  #informe .meta{font-family:var(--mono);font-size:11.5px;color:#333;margin-bottom:14px}
+  #informe table.datos{border-collapse:collapse;width:100%;margin-bottom:16px;font-size:12px}
+  #informe table.datos td{border:1px solid #999;padding:5px 8px}
+  #informe table.datos td.k{background:#EFEFEF;font-weight:700;width:26%}
+  #informe h2{font-size:14px;margin:16px 0 6px;border-bottom:2px solid #000;padding-bottom:3px}
+  #informe .item{border-bottom:1px solid #DDD;padding:7px 0;font-size:11.5px}
+  #informe .item .q{font-weight:700}
+  #informe .item .r{font-family:var(--mono);font-size:11px}
+  #informe .bien{color:#0A6E1E}
+  #informe .mal{color:#B01608}
+  #informe table.rejilla{border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-top:6px}
+  #informe table.rejilla th,#informe table.rejilla td{border:1px solid #666;padding:3px 7px;text-align:center}
+  #informe table.rejilla th{background:#EFEFEF}
+  #informe .firma{margin-top:26px;font-size:11px;color:#444;border-top:1px solid #999;padding-top:8px}
+
+  @media print{
+    @page{margin:14mm}
+    body{background:#fff;font-size:12px}
+    header.tapa, .marco > section:not(#informe), footer, .acciones, .estado-envio{display:none!important}
+    .marco{max-width:none;padding:0}
+    #informe{display:block}
+  }
+</style>
+</head>
+<body>
+
+<header class="tapa">
+  <div class="simbolos">∀ ∃ ∧ ∨ ¬ →</div>
+  <div class="marco" style="padding:0">
+    <div class="curso">Sistemas Expertos · ISOFBL143 · Unidad 1 · Semana 2</div>
+    <h1>Actividad: lógica de predicados y álgebra booleana</h1>
+    <p class="sub">Ingeniería de Software · UNIMINUTO · 2026-2 · Ing. Luis Fernando Londoño López</p>
+    <div class="marcador">
+      <span>Puntaje <b id="mPuntos">0</b> / 36</span>
+      <span>Binario <b class="bits" id="mBits">000000</b></span>
+      <span>Tiempo <b id="mTiempo">00:00</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="marco">
+
+  <!-- IDENTIFICACIÓN -->
+  <section class="bloque">
+    <div class="rotulo">
+      <div class="glifo">id</div>
+      <h2>Datos del estudiante</h2>
+    </div>
+    <p class="intro">Estos datos van en el reporte que llega al docente. Escríbelos como aparecen en el aula virtual.</p>
+    <div class="campos">
+      <label class="campo">Nombre y apellidos
+        <input id="fNombre" type="text" autocomplete="name" placeholder="Ana María Restrepo">
+      </label>
+      <label class="campo">Documento o código
+        <input id="fDoc" type="text" placeholder="1036xxxxxx">
+      </label>
+      <label class="campo">NRC o grupo
+        <input id="fGrupo" type="text" placeholder="NRC 4521">
+      </label>
+      <label class="campo">Tu correo institucional
+        <input id="fCorreo" type="email" autocomplete="email" placeholder="nombre@uniminuto.edu.co">
+      </label>
+    </div>
+  </section>
+
+  <!-- BLOQUE 1 -->
+  <section class="bloque">
+    <div class="rotulo">
+      <div class="glifo">∀</div>
+      <h2>Traducción al lenguaje formal</h2>
+      <span class="puntos">6 × 2 pts = 12</span>
+    </div>
+    <p class="intro">Cada frase en español tiene una sola formalización correcta. Fíjate en el cuantificador y en el conector que lo acompaña.</p>
+    <div id="bloque1"></div>
+  </section>
+
+  <!-- BLOQUE 2 -->
+  <section class="bloque">
+    <div class="rotulo">
+      <div class="glifo">⊤</div>
+      <h2>Tabla de verdad compuesta</h2>
+      <span class="puntos">24 celdas × 0,5 = 12</span>
+    </div>
+    <p class="intro">Completa las columnas intermedias y el resultado de <strong style="font-family:var(--mono)">(P ∧ ¬Q) → R</strong>. Cada clic en una celda cambia entre vacío, V y F.</p>
+    <div class="tabla-envoltura">
+      <table class="tv">
+        <thead>
+          <tr><th>P</th><th>Q</th><th>R</th><th>¬Q</th><th>P ∧ ¬Q</th><th>(P ∧ ¬Q) → R</th></tr>
+        </thead>
+        <tbody id="cuerpoTV"></tbody>
+      </table>
+    </div>
+    <p class="pista">Recuerda: la implicación solo es falsa cuando el antecedente es V y el consecuente es F.</p>
+    <div class="feedback" id="fbTV"></div>
+  </section>
+
+  <!-- BLOQUE 3 -->
+  <section class="bloque">
+    <div class="rotulo">
+      <div class="glifo">≡</div>
+      <h2>Verificación de equivalencias</h2>
+      <span class="puntos">6 × 2 pts = 12</span>
+    </div>
+    <p class="intro">Decide si cada par de expresiones tiene la misma tabla de verdad. Dos de ellas fallan en al menos una fila.</p>
+    <div id="bloque3"></div>
+  </section>
+
+  <!-- JUSTIFICACIÓN -->
+  <section class="bloque">
+    <div class="rotulo">
+      <div class="glifo">✎</div>
+      <h2>Justificación</h2>
+      <span class="puntos">no calificable</span>
+    </div>
+    <p class="intro">Explica con tus palabras por qué el enunciado 1 usa una implicación y el 2 una conjunción. El docente lee esta parte.</p>
+    <textarea id="fJustifica" placeholder="Escribe aquí tu justificación..."></textarea>
+    <div class="acciones">
+      <button class="btn acento" id="btnCalificar">Calificar actividad</button>
+      <button class="btn claro" id="btnReiniciar">Empezar de nuevo</button>
+    </div>
+    <p class="aviso" id="avisoFaltantes"></p>
+  </section>
+
+  <!-- RESULTADO -->
+  <section class="bloque" id="resultado">
+    <div class="rotulo">
+      <div class="glifo">Σ</div>
+      <h2>Resultado y envío</h2>
+    </div>
+    <div class="nota">
+      <div>
+        <div class="etq">Nota sobre 5,0</div>
+        <div class="cifra" id="rNota">0,0</div>
+      </div>
+      <div>
+        <div class="etq">Puntos</div>
+        <div class="cifra" id="rPuntos" style="font-size:34px">0</div>
+      </div>
+      <div>
+        <div class="etq">Aciertos</div>
+        <div class="cifra" id="rPorcentaje" style="font-size:34px">0%</div>
+      </div>
+    </div>
+    <div class="desglose" id="rDesglose"></div>
+    <div class="acciones" style="margin-top:18px">
+      <button class="btn acento" id="btnPDF">Descargar informe en PDF</button>
+      <button class="btn claro" id="btnEnviar">Enviar puntaje al docente</button>
+      <button class="btn claro" id="btnCorreo">Abrir en mi correo</button>
+      <button class="btn claro" id="btnCopiar">Copiar resumen</button>
+    </div>
+    <div class="estado-envio" id="estadoEnvio"></div>
+    <p class="aviso">El botón de PDF abre el cuadro de impresión del navegador: elige <strong>Guardar como PDF</strong> y sube ese archivo al aula virtual con el nombre ISOFBL143_S2_ApellidoNombre.pdf. El envío por correo lleva el puntaje y el detalle en texto; el PDF es tu entregable.</p>
+  </section>
+
+  <!-- INFORME PARA IMPRIMIR / PDF -->
+  <section id="informe"></section>
+
+  <footer>ISOFBL143 · Semana 2 · Actividad autocalificable</footer>
+</div>
+
+<script>
+/* =======================================================================
+   CONFIGURACIÓN — cambia solo estas líneas
+   ======================================================================= */
+const CONFIG = {
+  // Correo donde llegan los reportes de los estudiantes
+  correoDocente: "Luis.londonol@pascualbravo.edu.co",
+
+  // true  -> intenta enviar por FormSubmit (sin backend propio)
+  // false -> solo botón "Abrir en mi correo" con mailto
+  envioAutomatico: true,
+
+  asignatura: "Sistemas Expertos - ISOFBL143",
+  actividad: "Semana 2 - Logica de predicados y algebra booleana",
+  puntajeMaximo: 36
+};
+
+/* =======================================================================
+   CONTENIDO DE LA ACTIVIDAD
+   ======================================================================= */
+const preguntas1 = [
+  { frase:"Todos los estudiantes de ingeniería aprueban lógica.",
+    ops:["∀x (estudiante_ing(x) ∧ aprueba_logica(x))",
+         "∀x (estudiante_ing(x) → aprueba_logica(x))",
+         "∃x (estudiante_ing(x) → aprueba_logica(x))",
+         "∀x (aprueba_logica(x) → estudiante_ing(x))"],
+    ok:1,
+    expl:"El universal se acompaña de implicación. Con ∧ estarías afirmando que todo objeto del dominio es estudiante de ingeniería." },
+
+  { frase:"Existe un servidor que está caído.",
+    ops:["∃x (servidor(x) → caido(x))",
+         "∀x (servidor(x) ∧ caido(x))",
+         "∃x (servidor(x) ∧ caido(x))",
+         "¬∀x (servidor(x) ∧ caido(x))"],
+    ok:2,
+    expl:"El existencial se acompaña de conjunción. Con → la fórmula se satisface con cualquier objeto que no sea servidor, y no afirmaría nada." },
+
+  { frase:"Ningún proceso zombie consume CPU.",
+    ops:["∃x (zombie(x) ∧ ¬consume_cpu(x))",
+         "∀x (zombie(x) → ¬consume_cpu(x))",
+         "∀x (¬zombie(x) → consume_cpu(x))",
+         "¬∃x (zombie(x) → consume_cpu(x))"],
+    ok:1,
+    expl:"“Ninguno” niega la propiedad para todos los que cumplen el antecedente. Equivale a ¬∃x (zombie(x) ∧ consume_cpu(x))." },
+
+  { frase:"Se aprueba el crédito de un cliente que tiene buen historial e ingresos suficientes.",
+    ops:["∀x ((buen_historial(x) ∧ ingresos_suficientes(x)) → aprobar_credito(x))",
+         "∀x ((buen_historial(x) ∨ ingresos_suficientes(x)) → aprobar_credito(x))",
+         "∀x (aprobar_credito(x) → (buen_historial(x) ∧ ingresos_suficientes(x)))",
+         "∃x (buen_historial(x) ∧ ingresos_suficientes(x) ∧ aprobar_credito(x))"],
+    ok:0,
+    expl:"Es la regla del motor de inferencia vista en clase: las dos condiciones juntas son el antecedente. La opción con la implicación invertida dice otra cosa (que todo aprobado cumple las condiciones)." },
+
+  { frase:"Sócrates es un hombre y todo hombre es mortal.",
+    ops:["∀x (hombre(x) ∧ mortal(socrates))",
+         "hombre(socrates) → ∀x mortal(x)",
+         "hombre(socrates) ∧ ∀x (hombre(x) → mortal(x))",
+         "∃x (hombre(x) ∧ mortal(x))"],
+    ok:2,
+    expl:"Un hecho sobre una constante (socrates) unido por conjunción a una regla universal. De ahí el Modus Ponens deriva mortal(socrates)." },
+
+  { frase:"No todos los sensores están calibrados.",
+    ops:["∀x (sensor(x) → ¬calibrado(x))",
+         "¬∃x (sensor(x) ∧ calibrado(x))",
+         "∃x (sensor(x) → ¬calibrado(x))",
+         "¬∀x (sensor(x) → calibrado(x))"],
+    ok:3,
+    expl:"Negar el universal equivale a ∃x (sensor(x) ∧ ¬calibrado(x)). La primera opción dice algo más fuerte: que ninguno está calibrado." }
+];
+
+// Tabla de verdad de (P ∧ ¬Q) → R
+const filasTV = [
+  { p:"V", q:"V", r:"V", sol:["F","F","V"] },
+  { p:"V", q:"V", r:"F", sol:["F","F","V"] },
+  { p:"V", q:"F", r:"V", sol:["V","V","V"] },
+  { p:"V", q:"F", r:"F", sol:["V","V","F"] },
+  { p:"F", q:"V", r:"V", sol:["F","F","V"] },
+  { p:"F", q:"V", r:"F", sol:["F","F","V"] },
+  { p:"F", q:"F", r:"V", sol:["V","F","V"] },
+  { p:"F", q:"F", r:"F", sol:["V","F","V"] }
+];
+
+const preguntas3 = [
+  { a:"¬(P ∧ Q)", b:"¬P ∨ ¬Q", ok:true,
+    expl:"Primera ley de De Morgan." },
+  { a:"¬(P ∨ Q)", b:"¬P ∨ ¬Q", ok:false,
+    expl:"La negación de la disyunción es ¬P ∧ ¬Q. Falla, por ejemplo, cuando P es V y Q es F." },
+  { a:"P → Q", b:"¬P ∨ Q", ok:true,
+    expl:"Es la forma que usan los motores de inferencia para reescribir reglas antes de aplicar resolución." },
+  { a:"P → Q", b:"Q → P", ok:false,
+    expl:"La recíproca no es equivalente. Con P falso y Q verdadero, la primera es V y la segunda F." },
+  { a:"¬(P → Q)", b:"P ∧ ¬Q", ok:true,
+    expl:"Una implicación solo se niega en la fila donde el antecedente es V y el consecuente F." },
+  { a:"¬∃x P(x)", b:"∀x ¬P(x)", ok:true,
+    expl:"Ley de intercambio de cuantificadores: negar la existencia equivale a afirmar la negación para todos." }
+];
+
+/* =======================================================================
+   ESTADO Y CONSTRUCCIÓN
+   ======================================================================= */
+const resp1 = new Array(preguntas1.length).fill(null);
+const resp3 = new Array(preguntas3.length).fill(null);
+const respTV = filasTV.map(() => [null, null, null]);
+let calificado = false, puntos = 0, inicio = Date.now(), detalle = null;
+
+const $ = s => document.querySelector(s);
+const letras = ["a","b","c","d"];
+
+// Bloque 1
+const cont1 = $("#bloque1");
+preguntas1.forEach((pg, i) => {
+  const div = document.createElement("div");
+  div.className = "pregunta";
+  let html = '<div class="enunciado"><span class="num">' + (i+1) + '</span>'
+           + '<span class="frase"><em>' + pg.frase + '</em></span></div><div class="opciones">';
+  pg.ops.forEach((op, j) => {
+    html += '<label class="opcion" data-op="' + j + '">'
+          + '<input type="radio" name="p1_' + i + '" value="' + j + '">'
+          + '<span>' + letras[j] + ') &nbsp;' + op + '</span></label>';
+  });
+  html += '</div><div class="feedback" id="fb1_' + i + '"></div>';
+  div.innerHTML = html;
+  cont1.appendChild(div);
+  div.querySelectorAll('input[type=radio]').forEach(inp => {
+    inp.addEventListener("change", () => {
+      if (calificado) return;
+      resp1[i] = Number(inp.value);
+      div.querySelectorAll(".opcion").forEach(o => o.classList.remove("sel"));
+      inp.closest(".opcion").classList.add("sel");
+    });
+  });
+});
+
+// Bloque 2
+const cuerpo = $("#cuerpoTV");
+filasTV.forEach((f, i) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = '<td class="dato">' + f.p + '</td><td class="dato">' + f.q + '</td><td class="dato">' + f.r + '</td>';
+  for (let c = 0; c < 3; c++) {
+    const td = document.createElement("td");
+    const b = document.createElement("button");
+    b.className = "celda";
+    b.type = "button";
+    b.textContent = "·";
+    b.setAttribute("aria-label", "Fila " + (i+1) + ", columna " + (c+1));
+    b.addEventListener("click", () => {
+      if (calificado) return;
+      const actual = respTV[i][c];
+      const siguiente = actual === null ? "V" : (actual === "V" ? "F" : null);
+      respTV[i][c] = siguiente;
+      b.dataset.v = siguiente === null ? "" : siguiente;
+      b.textContent = siguiente === null ? "·" : siguiente;
+    });
+    td.appendChild(b);
+    tr.appendChild(td);
+  }
+  cuerpo.appendChild(tr);
+});
+
+// Bloque 3
+const cont3 = $("#bloque3");
+preguntas3.forEach((pg, i) => {
+  const div = document.createElement("div");
+  div.className = "pregunta";
+  div.innerHTML =
+    '<div class="enunciado"><span class="num">' + (i+1) + '</span>'
+    + '<div style="flex:1"><div class="par">' + pg.a + '&nbsp;&nbsp;<span style="color:var(--gris)">vs</span>&nbsp;&nbsp;' + pg.b + '</div>'
+    + '<div class="seg">'
+    + '<button type="button" data-v="1" aria-pressed="false">Equivalentes</button>'
+    + '<button type="button" data-v="0" aria-pressed="false">No equivalentes</button>'
+    + '</div><div class="feedback" id="fb3_' + i + '"></div></div></div>';
+  cont3.appendChild(div);
+  div.querySelectorAll(".seg button").forEach(b => {
+    b.addEventListener("click", () => {
+      if (calificado) return;
+      resp3[i] = b.dataset.v === "1";
+      div.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+    });
+  });
+});
+
+/* =======================================================================
+   CRONÓMETRO Y MARCADOR
+   ======================================================================= */
+function reloj() {
+  if (calificado) return;
+  const s = Math.floor((Date.now() - inicio) / 1000);
+  const mm = String(Math.floor(s / 60)).padStart(2, "0");
+  const ss = String(s % 60).padStart(2, "0");
+  $("#mTiempo").textContent = mm + ":" + ss;
+}
+setInterval(reloj, 1000);
+
+function pintarMarcador(p) {
+  $("#mPuntos").textContent = p;
+  $("#mBits").textContent = p.toString(2).padStart(6, "0");
+}
+
+/* =======================================================================
+   CALIFICACIÓN
+   ======================================================================= */
+function calificar() {
+  const faltan = [];
+  if (!$("#fNombre").value.trim()) faltan.push("tu nombre");
+  if (resp1.includes(null)) faltan.push("alguna traducción del bloque ∀");
+  if (respTV.some(f => f.includes(null))) faltan.push("celdas de la tabla de verdad");
+  if (resp3.includes(null)) faltan.push("alguna equivalencia");
+  if (faltan.length) {
+    $("#avisoFaltantes").textContent = "Falta por responder: " + faltan.join(", ") + ".";
+    $("#avisoFaltantes").style.color = "var(--falso)";
+    return;
+  }
+  $("#avisoFaltantes").textContent = "";
+  calificado = true;
+
+  let p1 = 0, p2 = 0, p3 = 0;
+  const errores = [], det1 = [], det3 = [];
+
+  // Bloque 1
+  preguntas1.forEach((pg, i) => {
+    const acierta = resp1[i] === pg.ok;
+    det1.push({ frase: pg.frase, marcada: letras[resp1[i]] + ") " + pg.ops[resp1[i]],
+                correcta: letras[pg.ok] + ") " + pg.ops[pg.ok], acierta: acierta, expl: pg.expl });
+    if (acierta) p1 += 2; else errores.push("B1." + (i+1) + " marcó " + letras[resp1[i]] + ", correcta " + letras[pg.ok]);
+    const cont = document.querySelectorAll("#bloque1 .pregunta")[i];
+    cont.querySelectorAll(".opcion").forEach((o, j) => {
+      o.classList.remove("sel");
+      if (j === pg.ok) o.classList.add("ok");
+      else if (j === resp1[i]) o.classList.add("mal");
+      o.querySelector("input").disabled = true;
+    });
+    const fb = document.getElementById("fb1_" + i);
+    fb.className = "feedback visible " + (acierta ? "bien" : "mal");
+    fb.textContent = (acierta ? "Correcta. " : "Revisa. ") + pg.expl;
+  });
+
+  // Bloque 2
+  let aciertosTV = 0;
+  const celdas = document.querySelectorAll(".celda");
+  filasTV.forEach((f, i) => {
+    for (let c = 0; c < 3; c++) {
+      const b = celdas[i * 3 + c];
+      const bien = respTV[i][c] === f.sol[c];
+      b.classList.add(bien ? "ok" : "mal");
+      if (bien) aciertosTV++;
+      b.disabled = true;
+    }
+  });
+  p2 = aciertosTV * 0.5;
+  if (aciertosTV < 24) errores.push("B2: " + (24 - aciertosTV) + " celdas incorrectas de 24");
+  const fbTV = $("#fbTV");
+  fbTV.className = "feedback visible " + (aciertosTV === 24 ? "bien" : "mal");
+  fbTV.textContent = aciertosTV === 24
+    ? "Tabla completa y correcta. Fíjate que la única fila falsa es P=V, Q=F, R=F."
+    : "Aciertos: " + aciertosTV + " de 24. La única fila en la que (P ∧ ¬Q) → R es falsa es P=V, Q=F, R=F, porque ahí el antecedente vale V y el consecuente F.";
+
+  // Bloque 3
+  preguntas3.forEach((pg, i) => {
+    const acierta = resp3[i] === pg.ok;
+    det3.push({ par: pg.a + "  vs  " + pg.b,
+                marcada: resp3[i] ? "Equivalentes" : "No equivalentes",
+                correcta: pg.ok ? "Equivalentes" : "No equivalentes",
+                acierta: acierta, expl: pg.expl });
+    if (acierta) p3 += 2; else errores.push("B3." + (i+1) + " respondió " + (resp3[i] ? "equivalentes" : "no equivalentes"));
+    const cont = document.querySelectorAll("#bloque3 .pregunta")[i];
+    cont.querySelectorAll(".seg button").forEach(b => {
+      const valor = b.dataset.v === "1";
+      if (valor === pg.ok) b.classList.add("ok");
+      else if (valor === resp3[i]) b.classList.add("mal");
+      b.disabled = true;
+    });
+    const fb = document.getElementById("fb3_" + i);
+    fb.className = "feedback visible " + (acierta ? "bien" : "mal");
+    fb.textContent = (acierta ? "Correcta. " : "Revisa. ") + pg.expl;
+  });
+
+  puntos = p1 + p2 + p3;
+  const pct = Math.round(puntos / CONFIG.puntajeMaximo * 100);
+  const nota = (puntos / CONFIG.puntajeMaximo * 5).toFixed(1).replace(".", ",");
+  const segundos = Math.floor((Date.now() - inicio) / 1000);
+
+  pintarMarcador(Math.round(puntos));
+  $("#rNota").textContent = nota;
+  $("#rPuntos").textContent = puntos.toString().replace(".", ",") + " / 36";
+  $("#rPorcentaje").textContent = pct + "%";
+  $("#rDesglose").innerHTML =
+      '<div><span>Traducción a lógica de predicados</span><span>' + p1 + ' / 12</span></div>'
+    + '<div><span>Tabla de verdad (P ∧ ¬Q) → R</span><span>' + String(p2).replace(".", ",") + ' / 12</span></div>'
+    + '<div><span>Equivalencias y De Morgan</span><span>' + p3 + ' / 12</span></div>'
+    + '<div><strong>Total</strong><strong>' + puntos.toString().replace(".", ",") + ' / 36</strong></div>';
+
+  detalle = {
+    nombre: $("#fNombre").value.trim(),
+    documento: $("#fDoc").value.trim() || "sin dato",
+    grupo: $("#fGrupo").value.trim() || "sin dato",
+    correo: $("#fCorreo").value.trim() || "sin dato",
+    fecha: new Date().toLocaleString("es-CO"),
+    tiempo: Math.floor(segundos / 60) + " min " + (segundos % 60) + " s",
+    p1: p1, p2: p2, p3: p3, total: puntos, pct: pct, nota: nota,
+    errores: errores.length ? errores : ["ninguno"],
+    justificacion: $("#fJustifica").value.trim() || "(no escribió justificación)"
+  };
+
+  construirInforme(det1, det3, aciertosTV);
+  $("#resultado").style.display = "block";
+  $("#resultado").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("#btnCalificar").disabled = true;
+}
+
+/* =======================================================================
+   INFORME IMPRIMIBLE (PDF)
+   ======================================================================= */
+function construirInforme(det1, det3, aciertosTV) {
+  const d = detalle;
+  const marca = ok => ok ? '<span class="bien">correcta</span>' : '<span class="mal">incorrecta</span>';
+
+  let h = '<h1>Informe de la actividad</h1>'
+        + '<div class="meta">' + CONFIG.asignatura + ' &nbsp;·&nbsp; ' + CONFIG.actividad
+        + ' &nbsp;·&nbsp; Ingeniería de Software, UNIMINUTO &nbsp;·&nbsp; Docente: Ing. Luis Fernando Londoño López</div>'
+        + '<table class="datos">'
+        + '<tr><td class="k">Estudiante</td><td>' + d.nombre + '</td><td class="k">Documento</td><td>' + d.documento + '</td></tr>'
+        + '<tr><td class="k">Grupo / NRC</td><td>' + d.grupo + '</td><td class="k">Correo</td><td>' + d.correo + '</td></tr>'
+        + '<tr><td class="k">Fecha</td><td>' + d.fecha + '</td><td class="k">Tiempo empleado</td><td>' + d.tiempo + '</td></tr>'
+        + '<tr><td class="k">Puntaje</td><td>' + String(d.total).replace(".", ",") + ' / 36 (' + d.pct + '%)</td>'
+        + '<td class="k">Nota sobre 5,0</td><td><strong>' + d.nota + '</strong></td></tr>'
+        + '<tr><td class="k">Traducción</td><td>' + d.p1 + ' / 12</td><td class="k">Tabla de verdad</td><td>'
+        + String(d.p2).replace(".", ",") + ' / 12 (' + aciertosTV + ' de 24 celdas)</td></tr>'
+        + '<tr><td class="k">Equivalencias</td><td colspan="3">' + d.p3 + ' / 12</td></tr>'
+        + '</table>';
+
+  h += '<h2>1. Traducción al lenguaje formal</h2>';
+  det1.forEach((it, i) => {
+    h += '<div class="item"><div class="q">' + (i+1) + '. ' + it.frase + ' &nbsp;— ' + marca(it.acierta) + '</div>'
+       + '<div class="r">Respuesta marcada: ' + it.marcada + '</div>'
+       + (it.acierta ? '' : '<div class="r">Respuesta correcta: ' + it.correcta + '</div>')
+       + '<div>' + it.expl + '</div></div>';
+  });
+
+  h += '<h2>2. Tabla de verdad de (P ∧ ¬Q) → R</h2>'
+     + '<table class="rejilla"><tr><th>P</th><th>Q</th><th>R</th>'
+     + '<th>¬Q</th><th>P ∧ ¬Q</th><th>(P ∧ ¬Q) → R</th><th>Tus respuestas</th></tr>';
+  filasTV.forEach((f, i) => {
+    const mias = respTV[i].map((v, c) => {
+      const ok = v === f.sol[c];
+      return '<span class="' + (ok ? 'bien' : 'mal') + '">' + v + '</span>';
+    }).join(' ');
+    h += '<tr><td>' + f.p + '</td><td>' + f.q + '</td><td>' + f.r + '</td>'
+       + '<td>' + f.sol[0] + '</td><td>' + f.sol[1] + '</td><td>' + f.sol[2] + '</td>'
+       + '<td>' + mias + '</td></tr>';
+  });
+  h += '</table><div class="item" style="border:none">La única fila en la que la expresión es falsa es P=V, Q=F, R=F: '
+     + 'ahí el antecedente P ∧ ¬Q vale V y el consecuente R vale F, el único caso en que una implicación falla.</div>';
+
+  h += '<h2>3. Verificación de equivalencias</h2>';
+  det3.forEach((it, i) => {
+    h += '<div class="item"><div class="q">' + (i+1) + '. <span class="r">' + it.par + '</span> &nbsp;— ' + marca(it.acierta) + '</div>'
+       + '<div class="r">Respuesta marcada: ' + it.marcada
+       + (it.acierta ? '' : ' &nbsp;|&nbsp; correcta: ' + it.correcta) + '</div>'
+       + '<div>' + it.expl + '</div></div>';
+  });
+
+  h += '<h2>4. Justificación del estudiante</h2>'
+     + '<div class="item" style="border:none">' + d.justificacion.replace(/</g, "&lt;").replace(/\n/g, "<br>") + '</div>'
+     + '<div class="firma">Informe generado automáticamente por la actividad de la Semana 2. '
+     + 'Entrega este PDF en el aula virtual con el nombre ISOFBL143_S2_ApellidoNombre.pdf</div>';
+
+  $("#informe").innerHTML = h;
+}
+
+function textoReporte() {
+  const d = detalle;
+  return [
+    CONFIG.asignatura,
+    CONFIG.actividad,
+    "-----------------------------------------",
+    "Estudiante: " + d.nombre,
+    "Documento: " + d.documento,
+    "Grupo/NRC: " + d.grupo,
+    "Correo: " + d.correo,
+    "Fecha: " + d.fecha,
+    "Tiempo empleado: " + d.tiempo,
+    "-----------------------------------------",
+    "Traduccion a logica de predicados: " + d.p1 + "/12",
+    "Tabla de verdad: " + String(d.p2).replace(".", ",") + "/12",
+    "Equivalencias: " + d.p3 + "/12",
+    "TOTAL: " + String(d.total).replace(".", ",") + "/36  (" + d.pct + "%)",
+    "NOTA SOBRE 5,0: " + d.nota,
+    "-----------------------------------------",
+    "Errores:",
+    d.errores.map(e => "  - " + e).join("\n"),
+    "-----------------------------------------",
+    "Justificacion del estudiante:",
+    d.justificacion
+  ].join("\n");
+}
+
+/* =======================================================================
+   ENVÍO
+   ======================================================================= */
+async function enviar() {
+  const est = $("#estadoEnvio");
+  if (!CONFIG.envioAutomatico) {
+    abrirCorreo();
+    return;
+  }
+  est.style.color = "var(--gris)";
+  est.textContent = "Enviando...";
+  $("#btnEnviar").disabled = true;
+  try {
+    const r = await fetch("https://formsubmit.co/ajax/" + CONFIG.correoDocente, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        _subject: "ISOFBL143 S2 - " + detalle.nombre + " - " + detalle.nota + "/5,0",
+        _template: "table",
+        Estudiante: detalle.nombre,
+        Documento: detalle.documento,
+        Grupo: detalle.grupo,
+        Correo: detalle.correo,
+        Fecha: detalle.fecha,
+        Tiempo: detalle.tiempo,
+        Bloque_1_Traduccion: detalle.p1 + "/12",
+        Bloque_2_Tabla: String(detalle.p2).replace(".", ",") + "/12",
+        Bloque_3_Equivalencias: detalle.p3 + "/12",
+        Total: String(detalle.total).replace(".", ",") + "/36",
+        Porcentaje: detalle.pct + "%",
+        Nota: detalle.nota + "/5,0",
+        Errores: detalle.errores.join(" | "),
+        Justificacion: detalle.justificacion
+      })
+    });
+    const data = await r.json();
+    if (data.success === "true" || data.success === true) {
+      est.style.color = "var(--verdadero)";
+      est.textContent = "Enviado. El docente recibió tu reporte.";
+    } else {
+      throw new Error(data.message || "respuesta no esperada");
+    }
+  } catch (e) {
+    est.style.color = "var(--falso)";
+    est.textContent = "No se pudo enviar automáticamente. Usa “Abrir en mi correo” o descarga el reporte y súbelo al aula virtual.";
+    $("#btnEnviar").disabled = false;
+  }
+}
+
+function abrirCorreo() {
+  const asunto = "ISOFBL143_S2_" + detalle.nombre.replace(/\s+/g, "") + " - Nota " + detalle.nota;
+  const url = "mailto:" + CONFIG.correoDocente
+            + "?subject=" + encodeURIComponent(asunto)
+            + "&body=" + encodeURIComponent(textoReporte());
+  window.location.href = url;
+}
+
+function generarPDF() {
+  const partes = detalle.nombre.trim().split(/\s+/);
+  const apellido = partes.length > 1 ? partes[partes.length - 1] : partes[0];
+  const original = document.title;
+  document.title = "ISOFBL143_S2_" + apellido + partes[0];
+  $("#estadoEnvio").style.color = "var(--gris)";
+  $("#estadoEnvio").textContent = "En el cuadro de impresión, elige “Guardar como PDF” en Destino.";
+  window.print();
+  setTimeout(() => { document.title = original; }, 1500);
+}
+
+async function copiar() {
+  try {
+    await navigator.clipboard.writeText(textoReporte());
+    $("#estadoEnvio").style.color = "var(--verdadero)";
+    $("#estadoEnvio").textContent = "Reporte copiado al portapapeles.";
+  } catch (e) {
+    $("#estadoEnvio").style.color = "var(--falso)";
+    $("#estadoEnvio").textContent = "El navegador bloqueó el portapapeles. Descarga el reporte.";
+  }
+}
+
+$("#btnCalificar").addEventListener("click", calificar);
+$("#btnReiniciar").addEventListener("click", () => location.reload());
+$("#btnEnviar").addEventListener("click", enviar);
+$("#btnCorreo").addEventListener("click", abrirCorreo);
+$("#btnPDF").addEventListener("click", generarPDF);
+$("#btnCopiar").addEventListener("click", copiar);
+</script>
+</body>
+</html>
